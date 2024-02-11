@@ -1,7 +1,7 @@
 {
-	"name": "obsidian-sample-plugin",
+	"name": "obsidian-hatena-plugin",
 	"version": "1.0.0",
-	"description": "This is a sample plugin for Obsidian (https://obsidian.md)",
+	"description": "This is a hatena plugin for Obsidian (https://obsidian.md)",
 	"main": "main.js",
 	"scripts": {
 		"dev": "node esbuild.config.mjs",
@@ -10,7 +10,7 @@
 		"format": "npx @biomejs/biome format . --write"
 	},
 	"keywords": [],
-	"author": "",
+	"author": "takmatsukawa",
 	"license": "MIT",
 	"devDependencies": {
 		"@biomejs/biome": "1.5.3",
