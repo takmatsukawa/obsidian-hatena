@@ -55,13 +55,12 @@ export default class HatenaPlugin extends Plugin {
 				}
 
 				const title = file.name.replace(/\.md$/, "");
-				const text = editor.getDoc().getValue()
-				// const position = view.app.metadataCache.getFileCache(file)?.frontmatterPosition;
-				// if (!position) {
-				// 	return;
-				// }
-				// const end = position.end.line + 1 // accont for ending ---
-				// const body = text.split("\n").slice(end).join("\n")
+				let text = editor.getDoc().getValue()
+				const position = view.app.metadataCache.getFileCache(file)?.frontmatterPosition;
+				if (position) {
+					const end = position.end.line + 1;
+					text = text.split("\n").slice(end).join("\n")
+				}
 				const body = `<?xml version="1.0" encoding="utf-8"?>
 				<entry xmlns="http://www.w3.org/2005/Atom"
 					   xmlns:app="http://www.w3.org/2007/app">
