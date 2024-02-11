@@ -1,4 +1,4 @@
-import { Editor, MarkdownView, Plugin, request } from "obsidian";
+import { Editor, MarkdownView, Plugin, request, Notice } from "obsidian";
 import {
 	HatenaPluginSettings,
 	DEFAULT_SETTINGS,
@@ -41,18 +41,37 @@ export default class HatenaPlugin extends Plugin {
 				// rootEndpoint is like: https://blog.hatena.ne.jp/userId/userId.hatenablog.com/atom
 				const userId = rootEndpoint.split("/")[3];
 
-				console.log({ apiKey, rootEndpoint, userId });
+				const file = view.file;
+				if (!file) {
+					return;
+				}
+				const title = file.name.replace(/\.md$/, "");
+				const text = editor.getDoc().getValue()
+				// const position = view.app.metadataCache.getFileCache(file)?.frontmatterPosition;
+				// if (!position) {
+				// 	return;
+				// }
+				// const end = position.end.line + 1 // accont for ending ---
+				// const body = text.split("\n").slice(end).join("\n")
+				const body = `<?xml version="1.0" encoding="utf-8"?>
+				<entry xmlns="http://www.w3.org/2005/Atom"
+					   xmlns:app="http://www.w3.org/2007/app">
+				  <title>${title}</title>
+				  <content type="text/plain">${text}</content>
+				</entry>`;
 
 				const response = await request({
 					url: `${rootEndpoint}/entry`,
-					method: "GET",
+					method: "POST",
 					contentType: "application/xml",
 					headers: {
 						Authorization: `Basic ${btoa(`${userId}:${apiKey}`)}`,
 					},
+					body,
 				});
 
-				console.log(response);
+				new Notice("Published successfully!");
+				
 			},
 		});
 		// This adds a complex command that can check whether the current state of the app allows execution of the command
