@@ -1,13 +1,14 @@
-import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
-
+import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting, request } from 'obsidian';
 // Remember to rename these classes and interfaces!
 
 interface MyPluginSettings {
-	mySetting: string;
+	apiKey: string;
+	rootEndpoint: string;
 }
 
 const DEFAULT_SETTINGS: MyPluginSettings = {
-	mySetting: 'default'
+	apiKey: '',
+	rootEndpoint: '',
 }
 
 export default class MyPlugin extends Plugin {
@@ -38,11 +39,27 @@ export default class MyPlugin extends Plugin {
 		// });
 		// This adds an editor command that can perform some operation on the current editor instance
 		this.addCommand({
-			id: 'sample-editor-command',
-			name: 'Sample editor command',
-			editorCallback: (editor: Editor, view: MarkdownView) => {
-				console.log(editor.getSelection());
-				editor.replaceSelection('Sample Editor Commandhoge');
+			id: 'publish',
+			name: 'Publish this note',
+			editorCallback: async (editor: Editor, view: MarkdownView) => {
+
+				const apiKey = this.settings.apiKey;
+				const rootEndpoint = this.settings.rootEndpoint;
+				const userId =
+					rootEndpoint.split('/')[3];
+
+				console.log({ apiKey, rootEndpoint, userId })
+
+				const response = await request({
+					url: `${rootEndpoint}/entry`,
+					method: 'GET',
+					contentType: 'application/xml',
+					headers: {
+						Authorization: `Basic ${btoa(`${userId}:${apiKey}`)}`,
+					},
+				})
+
+				console.log(response);
 			}
 		});
 		// This adds a complex command that can check whether the current state of the app allows execution of the command
@@ -91,22 +108,6 @@ export default class MyPlugin extends Plugin {
 	}
 }
 
-class SampleModal extends Modal {
-	constructor(app: App) {
-		super(app);
-	}
-
-	onOpen() {
-		const {contentEl} = this;
-		contentEl.setText('Woah!');
-	}
-
-	onClose() {
-		const {contentEl} = this;
-		contentEl.empty();
-	}
-}
-
 class SampleSettingTab extends PluginSettingTab {
 	plugin: MyPlugin;
 
@@ -121,13 +122,22 @@ class SampleSettingTab extends PluginSettingTab {
 		containerEl.empty();
 
 		new Setting(containerEl)
-			.setName('Setting #1')
-			.setDesc('It\'s a secret')
+			.setName('API Key')
+			.setDesc('Hatena user API key.')
 			.addText(text => text
-				.setPlaceholder('Enter your secret')
-				.setValue(this.plugin.settings.mySetting)
+				.setValue(this.plugin.settings.apiKey)
 				.onChange(async (value) => {
-					this.plugin.settings.mySetting = value;
+					this.plugin.settings.apiKey = value;
+					await this.plugin.saveSettings();
+				}));
+
+		new Setting(containerEl)
+			.setName('Root Endpoint')
+			.setDesc('Hatena blog\'s AtomPub root endpoint.')
+			.addText(text => text
+				.setValue(this.plugin.settings.rootEndpoint)
+				.onChange(async (value) => {
+					this.plugin.settings.rootEndpoint = value;
 					await this.plugin.saveSettings();
 				}));
 	}
