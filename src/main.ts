@@ -1,4 +1,14 @@
-import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting, request } from 'obsidian';
+import {
+	App,
+	Editor,
+	MarkdownView,
+	Modal,
+	Notice,
+	Plugin,
+	PluginSettingTab,
+	Setting,
+	request,
+} from "obsidian";
 // Remember to rename these classes and interfaces!
 
 interface MyPluginSettings {
@@ -7,9 +17,9 @@ interface MyPluginSettings {
 }
 
 const DEFAULT_SETTINGS: MyPluginSettings = {
-	apiKey: '',
-	rootEndpoint: '',
-}
+	apiKey: "",
+	rootEndpoint: "",
+};
 
 export default class MyPlugin extends Plugin {
 	settings: MyPluginSettings;
@@ -39,28 +49,27 @@ export default class MyPlugin extends Plugin {
 		// });
 		// This adds an editor command that can perform some operation on the current editor instance
 		this.addCommand({
-			id: 'publish',
-			name: 'Publish this note',
+			id: "publish",
+			name: "Publish this note",
 			editorCallback: async (editor: Editor, view: MarkdownView) => {
-
 				const apiKey = this.settings.apiKey;
 				const rootEndpoint = this.settings.rootEndpoint;
-				const userId =
-					rootEndpoint.split('/')[3];
+				// rootEndpoint is like: https://blog.hatena.ne.jp/userId/userId.hatenablog.com/atom
+				const userId = rootEndpoint.split("/")[3];
 
-				console.log({ apiKey, rootEndpoint, userId })
+				console.log({ apiKey, rootEndpoint, userId });
 
 				const response = await request({
 					url: `${rootEndpoint}/entry`,
-					method: 'GET',
-					contentType: 'application/xml',
+					method: "GET",
+					contentType: "application/xml",
 					headers: {
 						Authorization: `Basic ${btoa(`${userId}:${apiKey}`)}`,
 					},
-				})
+				});
 
 				console.log(response);
-			}
+			},
 		});
 		// This adds a complex command that can check whether the current state of the app allows execution of the command
 		// this.addCommand({
@@ -95,9 +104,7 @@ export default class MyPlugin extends Plugin {
 		// this.registerInterval(window.setInterval(() => console.log('setInterval'), 5 * 60 * 1000));
 	}
 
-	onunload() {
-
-	}
+	onunload() {}
 
 	async loadSettings() {
 		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
@@ -117,28 +124,30 @@ class SampleSettingTab extends PluginSettingTab {
 	}
 
 	display(): void {
-		const {containerEl} = this;
+		const { containerEl } = this;
 
 		containerEl.empty();
 
 		new Setting(containerEl)
-			.setName('API Key')
-			.setDesc('Hatena user API key.')
-			.addText(text => text
-				.setValue(this.plugin.settings.apiKey)
-				.onChange(async (value) => {
+			.setName("API Key")
+			.setDesc("Hatena user API key.")
+			.addText((text) =>
+				text.setValue(this.plugin.settings.apiKey).onChange(async (value) => {
 					this.plugin.settings.apiKey = value;
 					await this.plugin.saveSettings();
-				}));
+				}),
+			);
 
 		new Setting(containerEl)
-			.setName('Root Endpoint')
-			.setDesc('Hatena blog\'s AtomPub root endpoint.')
-			.addText(text => text
-				.setValue(this.plugin.settings.rootEndpoint)
-				.onChange(async (value) => {
-					this.plugin.settings.rootEndpoint = value;
-					await this.plugin.saveSettings();
-				}));
+			.setName("Root Endpoint")
+			.setDesc("Hatena blog's AtomPub root endpoint.")
+			.addText((text) =>
+				text
+					.setValue(this.plugin.settings.rootEndpoint)
+					.onChange(async (value) => {
+						this.plugin.settings.rootEndpoint = value;
+						await this.plugin.saveSettings();
+					}),
+			);
 	}
 }
