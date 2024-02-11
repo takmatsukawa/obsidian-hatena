@@ -1,4 +1,4 @@
-import { Editor, MarkdownView, Plugin, request, Notice } from "obsidian";
+import { Editor, MarkdownView, Plugin, Notice, requestUrl } from "obsidian";
 import {
 	HatenaPluginSettings,
 	DEFAULT_SETTINGS,
@@ -45,6 +45,15 @@ export default class HatenaPlugin extends Plugin {
 				if (!file) {
 					return;
 				}
+
+				let url = `${rootEndpoint}/entry`;
+				let method = "POST";
+				const hatenaUri = view.app.metadataCache.getFileCache(file)?.frontmatter?.["hatena-uri"];
+				if (hatenaUri) {
+					url = hatenaUri;
+					method = "PUT";
+				}
+
 				const title = file.name.replace(/\.md$/, "");
 				const text = editor.getDoc().getValue()
 				// const position = view.app.metadataCache.getFileCache(file)?.frontmatterPosition;
@@ -60,15 +69,27 @@ export default class HatenaPlugin extends Plugin {
 				  <content type="text/plain">${text}</content>
 				</entry>`;
 
-				const response = await request({
-					url: `${rootEndpoint}/entry`,
-					method: "POST",
+				const response = await requestUrl({
+					url,
+					method,
 					contentType: "application/xml",
 					headers: {
 						Authorization: `Basic ${btoa(`${userId}:${apiKey}`)}`,
 					},
 					body,
 				});
+
+				if (response.status !== 201 && response.status !== 200) {
+					new Notice("Failed to publish!");
+					return;
+				}
+
+				const memberUri = response.headers.location;
+				if (memberUri) {
+					view.app.fileManager.processFrontMatter(file, (fm) => {
+						fm["hatena-uri"] = memberUri;
+					})
+				}
 
 				new Notice("Published successfully!");
 				
