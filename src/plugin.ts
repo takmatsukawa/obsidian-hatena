@@ -40,8 +40,16 @@ export default class HatenaPlugin extends Plugin {
 			editorCallback: async (editor: Editor, view: MarkdownView) => {
 				const apiKey = this.settings.apiKey;
 				const rootEndpoint = this.settings.rootEndpoint;
+				if (!apiKey.length || !rootEndpoint.length) {
+					new Notice("API Key or Root Endpoint is not set");
+					return;
+				}
 				// rootEndpoint is like: https://blog.hatena.ne.jp/userId/userId.hatenablog.com/atom
 				const userId = rootEndpoint.split("/")[3];
+				if (!userId) {
+					new Notice("Invalid Root Endpoint");
+					return;
+				}
 
 				const file = view.file;
 				if (!file) {
