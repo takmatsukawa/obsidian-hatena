@@ -4,6 +4,7 @@ import {
 	DEFAULT_SETTINGS,
 	HatenaSettingTab,
 } from "./settings";
+import wsse from 'wsse';
 import * as he from "he";
 
 export default class HatenaPlugin extends Plugin {
@@ -79,12 +80,14 @@ export default class HatenaPlugin extends Plugin {
 				  <content type="text/plain">${he.escape(text)}</content>
 				</entry>`;
 
+				const token = wsse({ username: userId, password: apiKey });
+
 				const response = await requestUrl({
 					url,
 					method,
 					contentType: "application/xml",
 					headers: {
-						Authorization: `Basic ${btoa(`${userId}:${apiKey}`)}`,
+						"X-WSSE": token.toString(),
 					},
 					body,
 				});
