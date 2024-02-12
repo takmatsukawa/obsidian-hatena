@@ -5,7 +5,5 @@
 	"minAppVersion": "0.15.0",
 	"description": "You can publish notes into Hatena blog.",
 	"author": "takmatsukawa",
-	"authorUrl": "https://obsidian.md",
-	"fundingUrl": "https://obsidian.md/pricing",
 	"isDesktopOnly": false
 }
