@@ -44,6 +44,7 @@ export default class HatenaPlugin extends Plugin {
 
 				const file = view.file;
 				if (!file) {
+					new Notice("File not found");
 					return;
 				}
 
@@ -85,7 +86,7 @@ export default class HatenaPlugin extends Plugin {
 				});
 
 				if (response.status !== 201 && response.status !== 200) {
-					new Notice("Failed to publish!");
+					new Notice("Failed to publish");
 					return;
 				}
 
