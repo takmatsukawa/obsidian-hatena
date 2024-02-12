@@ -1,24 +1,22 @@
-# はてなブログ投稿用 Obsidian プラグイン
+# Obsidian Hatena Blog Plugin
 
-Obsidianノートをはてなブログに投稿するプラグインです。
+Post directly to your [Hatena Blog](https://hatenablog.com/) from [Obsidian](https://obsidian.md/).
 
-## 設定
+## Initial setup
 
-はてなブログへの投稿には、はてなAPIを利用します。以下の手順で情報を取得し、設定画面に入力してください。
+For this plugin to work, you will need to provide your Hatena blog's root endpoint and API key.
 
-1. はてなブログの設定画面を開く
-2. Advanced > AtomPubの設定を開く
-3. Root endpointをコピーする
-4. アカウント設定画面を開く
-5. API keyをコピーする
+**Settings:**
 
-## 使い方
+- `API Key`: You can obtain the API key from Hatena account settings page.
+- `Root Endpoint`: You can obtain the root endpoint from Hatena Blog settings page: Advanced > AtomPub.
 
-### コマンド
+## How to Use
 
-- `Hatena: Publish this note`: 現在開いているノートをはてなブログに投稿します
+**Commands:**
 
-## Todo
+- `Hatena: Publish this note`: Posts the current active note to Hatena Blog.
 
-- [ ] 画像アップロード
-  - はてなフォトライフのAPIを利用する
+## Limitations
+
+- Image files cannot be attached yet
