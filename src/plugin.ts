@@ -68,6 +68,10 @@ export default class HatenaPlugin extends Plugin {
 					const end = position.end.line + 1;
 					text = text.split("\n").slice(end).join("\n");
 				}
+
+				// Replace internal link: [[text]] -> text
+				text = text.replace(/\[\[(.+?)\]\]/g, "$1");
+
 				const body = `<?xml version="1.0" encoding="utf-8"?>
 				<entry xmlns="http://www.w3.org/2005/Atom"
 					   xmlns:app="http://www.w3.org/2007/app">
