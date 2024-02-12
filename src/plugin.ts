@@ -4,6 +4,7 @@ import {
 	DEFAULT_SETTINGS,
 	HatenaSettingTab,
 } from "./settings";
+import * as he from "he";
 
 export default class HatenaPlugin extends Plugin {
 	settings: HatenaPluginSettings;
@@ -46,26 +47,31 @@ export default class HatenaPlugin extends Plugin {
 					return;
 				}
 
-				let url = `${rootEndpoint}/entry`;
-				let method = "POST";
-				const hatenaUri = view.app.metadataCache.getFileCache(file)?.frontmatter?.["hatena-uri"];
-				if (hatenaUri) {
-					url = hatenaUri;
-					method = "PUT";
-				}
+				const hatenaUri =
+					view.app.metadataCache.getFileCache(file)?.frontmatter?.[
+						"hatena-uri"
+					];
+				const {url, method} = hatenaUri ? {
+					url: hatenaUri,
+					method: "PUT",
+				} : {
+					url: `${rootEndpoint}/entry`,
+					method: "POST",
+				};
 
 				const title = file.name.replace(/\.md$/, "");
-				let text = editor.getDoc().getValue()
-				const position = view.app.metadataCache.getFileCache(file)?.frontmatterPosition;
+				let text = editor.getDoc().getValue();
+				const position =
+					view.app.metadataCache.getFileCache(file)?.frontmatterPosition;
 				if (position) {
 					const end = position.end.line + 1;
-					text = text.split("\n").slice(end).join("\n")
+					text = text.split("\n").slice(end).join("\n");
 				}
 				const body = `<?xml version="1.0" encoding="utf-8"?>
 				<entry xmlns="http://www.w3.org/2005/Atom"
 					   xmlns:app="http://www.w3.org/2007/app">
-				  <title>${title}</title>
-				  <content type="text/plain">${text}</content>
+				  <title>${he.escape(title)}</title>
+				  <content type="text/plain">${he.escape(text)}</content>
 				</entry>`;
 
 				const response = await requestUrl({
@@ -87,11 +93,10 @@ export default class HatenaPlugin extends Plugin {
 				if (memberUri) {
 					view.app.fileManager.processFrontMatter(file, (fm) => {
 						fm["hatena-uri"] = memberUri;
-					})
+					});
 				}
 
 				new Notice("Published successfully!");
-				
 			},
 		});
 		// This adds a complex command that can check whether the current state of the app allows execution of the command
