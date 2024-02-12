@@ -1,4 +1,4 @@
-# Obsidian Hatena Blog Plugin
+# Obsidian Hatena Blog Publisher
 
 Post directly to your [Hatena Blog](https://hatenablog.com/) from [Obsidian](https://obsidian.md/).
 

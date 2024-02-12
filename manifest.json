@@ -1,6 +1,6 @@
 {
 	"id": "hatena",
-	"name": "Hatena",
+	"name": "Hatena Blog Publisher",
 	"version": "0.0.2",
 	"minAppVersion": "0.15.0",
 	"description": "You can publish notes into Hatena blog.",
