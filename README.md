@@ -15,8 +15,4 @@ For this plugin to work, you will need to provide your Hatena blog's root endpoi
 
 **Commands:**
 
-- `Hatena: Publish this note`: Posts the current active note to Hatena Blog.
-
-## Limitations
-
-- Image files cannot be attached yet
+- `Publish this note`: Posts the current active note to Hatena Blog.
