@@ -1,32 +1,31 @@
-export const getWsseHeader = async ({
+export async function getWsseHeader({
 	username,
 	password,
-}: { username: string; password: string }) => {
-	const nonce = generateRandomString(16);
-	const timestamp = new Date().toISOString();
-	const digest = await base64Sha1(nonce + timestamp + password);
-	return `UsernameToken Username="${username}", PasswordDigest="${digest}", Nonce="${nonce}", Created="${timestamp}"`;
-};
+}: { username: string; password: string }) {
+	if (!username || !password) {
+		throw new Error("Username and API key are required");
+	}
 
-const base64Sha1 = async (str: string) => {
-	const hexDigest = await sha1(str);
-	return Buffer.from(hexDigest, "hex").toString("base64");
-};
+	const nonce = generateNonce();
+	const now = new Date().toISOString();
+	const digest = await sha1(nonce + now + password);
+	const encodedDigest = btoa(String.fromCharCode(...new Uint8Array(digest)));
+	const encodedNonce = btoa(nonce);
 
-const sha1 = async (text: string): Promise<string> => {
-	const encoder = new TextEncoder();
-	const data = encoder.encode(text);
-	const hash = await crypto.subtle.digest("SHA-1", data);
+	const credentials = `UsernameToken Username="${username}", PasswordDigest="${encodedDigest}", Nonce="${encodedNonce}", Created="${now}"`;
 
-	return Array.from(new Uint8Array(hash))
-		.map((byte) => byte.toString(16).padStart(2, "0"))
-		.join("");
-};
+	return credentials;
+}
 
-const generateRandomString = (length = 64) => {
-	const array = new Uint8Array(length);
+function generateNonce() {
+	const array = new Uint8Array(16);
 	crypto.getRandomValues(array);
-	return Array.from(array)
-		.map((byte) => byte.toString(16).padStart(2, "0"))
-		.join("");
-};
+	return array.join("");
+}
+
+async function sha1(data: string) {
+	const encoder = new TextEncoder();
+	const dataBuffer = encoder.encode(data);
+	const hashBuffer = await crypto.subtle.digest("SHA-1", dataBuffer);
+	return hashBuffer;
+}
