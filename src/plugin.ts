@@ -15,7 +15,7 @@ import { getWsseHeader } from "./wsse";
 import * as he from "he";
 import mime from "mime";
 
-const fileNameRegex1 = /!\[\[(.+).((jpe?g|png|gif|svg|bmp|webp))]]/gi;
+const fileNameRegex1 = /(jpe?g|png|gif|svg|bmp|webp)$/i;
 
 export default class HatenaPlugin extends Plugin {
 	settings: HatenaPluginSettings;
@@ -55,43 +55,59 @@ export default class HatenaPlugin extends Plugin {
 
 				let text = editor.getValue();
 
-				for (const match of text.matchAll(fileNameRegex1)) {
-					const [link, basename, extension] = match;
-					const fileName = `${basename}.${extension}`;
-					// Base64 encode the file
-					const fileBinaly = await view.app.vault.adapter.readBinary(
-						normalizePath(fileName),
-					);
-					const base64File = Buffer.from(fileBinaly).toString("base64");
-					const fileMime = mime.getType(extension);
+				const meta = view.app.metadataCache.getFileCache(file);
 
-					const postUrl = "https://f.hatena.ne.jp/atom/post";
-					const body = `<entry xmlns="http://purl.org/atom/ns#">
-					<dc:subject>Hatena Blog</dc:subject>
-					<title>${he.escape(fileName)}</title>
-					<content mode="base64" type="${fileMime}">${base64File}</content>
-					</entry>`;
-					const response = await requestUrl({
-						url: postUrl,
-						method: "POST",
-						contentType: "application/xml",
-						headers: {
-							"X-WSSE": token,
-							Accept: "application/x.atom+xml, application/xml, text/xml, */*",
-						},
-						body,
-					});
-					if (response.status !== 201 && response.status !== 200) {
-						new Notice("Failed to upload image");
-						return;
-					}
-					// Get the image id
-					const parser = new DOMParser();
-					const xmlDoc = parser.parseFromString(response.text, "text/xml");
-					const imageId =
-						xmlDoc.getElementsByTagName("hatena:syntax")[0].textContent;
-					if (imageId) {
-						text = text.replace(link, `[${imageId}]`);
+				if (meta?.embeds) {
+					for (const embed of meta.embeds) {
+						const { original, link } = embed;
+						if (!fileNameRegex1.test(link)) {
+							continue;
+						}
+						const source = view.app.metadataCache.getFirstLinkpathDest(
+							link,
+							file.path,
+						);
+						if (!source) {
+							continue;
+						}
+
+						// Base64 encode the file
+						const fileBinaly = await view.app.vault.adapter.readBinary(
+							normalizePath(source.path),
+						);
+						const base64File = Buffer.from(fileBinaly).toString("base64");
+						const fileMime = mime.getType(source.extension);
+
+						const postUrl = "https://f.hatena.ne.jp/atom/post";
+						const body = `<entry xmlns="http://purl.org/atom/ns#">
+						<dc:subject>Hatena Blog</dc:subject>
+						<title>${he.escape(source.basename)}</title>
+						<content mode="base64" type="${fileMime}">${base64File}</content>
+						</entry>`;
+						const response = await requestUrl({
+							url: postUrl,
+							method: "POST",
+							contentType: "application/xml",
+							headers: {
+								"X-WSSE": token,
+								Accept:
+									"application/x.atom+xml, application/xml, text/xml, */*",
+							},
+							body,
+						});
+						if (response.status !== 201 && response.status !== 200) {
+							new Notice("Failed to upload image");
+							return;
+						}
+						// Get the image id
+						const parser = new DOMParser();
+						const xmlDoc = parser.parseFromString(response.text, "text/xml");
+						const imageId =
+							xmlDoc.getElementsByTagName("hatena:syntax")[0].textContent;
+						if (imageId) {
+							const re = new RegExp(escapeRegExp(original), "g");
+							text = text.replace(re, `[${imageId}]`);
+						}
 					}
 				}
 
@@ -173,3 +189,5 @@ export default class HatenaPlugin extends Plugin {
  */
 const replaceInternalLink = (text: string) =>
 	text.replace(/\[\[(.+?)\]\]/g, "$1");
+
+const escapeRegExp = (string: string) => string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
