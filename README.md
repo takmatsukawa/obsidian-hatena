@@ -1,5 +1,7 @@
 # Obsidian Hatena Blog Publisher
 
+[日本語](/README-JP.md)
+
 Post directly to your [Hatena Blog](https://hatenablog.com/) from [Obsidian](https://obsidian.md/).
 
 ## Initial setup
