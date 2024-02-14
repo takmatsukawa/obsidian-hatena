@@ -53,6 +53,7 @@ export default class HatenaPlugin extends Plugin {
 
 				new Notice("Publishing...");
 
+				const domParser = new DOMParser();
 				let text = editor.getValue();
 
 				const meta = view.app.metadataCache.getFileCache(file);
@@ -100,8 +101,7 @@ export default class HatenaPlugin extends Plugin {
 							return;
 						}
 						// Get the image id
-						const parser = new DOMParser();
-						const xmlDoc = parser.parseFromString(response.text, "text/xml");
+						const xmlDoc = domParser.parseFromString(response.text, "text/xml");
 						const imageId =
 							xmlDoc.getElementsByTagName("hatena:syntax")[0].textContent;
 						if (imageId) {
@@ -128,13 +128,13 @@ export default class HatenaPlugin extends Plugin {
 				  <content type="text/plain">${he.escape(text)}</content>
 				</entry>`;
 
-				const hatenaUri =
+				const savedMemberUri =
 					view.app.metadataCache.getFileCache(file)?.frontmatter?.[
-						"hatena-uri"
+						"hatena-member-uri"
 					];
-				const { url, method } = hatenaUri
+				const { url, method } = savedMemberUri
 					? {
-							url: hatenaUri,
+							url: savedMemberUri,
 							method: "PUT",
 					  }
 					: {
@@ -158,11 +158,19 @@ export default class HatenaPlugin extends Plugin {
 				}
 
 				const memberUri = response.headers.location;
-				if (memberUri) {
-					view.app.fileManager.processFrontMatter(file, (fm) => {
-						fm["hatena-uri"] = memberUri;
-					});
-				}
+
+				const xmlDoc = domParser.parseFromString(response.text, "text/xml");
+				const alternateLink = xmlDoc.querySelector('link[rel="alternate"]');
+				const hatenaUrl = alternateLink?.getAttribute("href");
+
+				view.app.fileManager.processFrontMatter(file, (fm) => {
+					if (memberUri) {
+						fm["hatena-member-uri"] = memberUri;
+					}
+					if (hatenaUrl) {
+						fm["hatena-url"] = hatenaUrl;
+					}
+				});
 
 				new Notice("Published successfully!");
 			},
@@ -190,4 +198,5 @@ export default class HatenaPlugin extends Plugin {
 const replaceInternalLink = (text: string) =>
 	text.replace(/\[\[(.+?)\]\]/g, "$1");
 
-const escapeRegExp = (string: string) => string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+const escapeRegExp = (string: string) =>
+	string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
