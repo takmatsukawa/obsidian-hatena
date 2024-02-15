@@ -95,6 +95,9 @@ export default class HatenaPlugin extends Plugin {
 									"application/x.atom+xml, application/xml, text/xml, */*",
 							},
 							body,
+						}).catch((e) => {
+							console.error(e);
+							return e;
 						});
 						if (response.status !== 201 && response.status !== 200) {
 							new Notice("Failed to upload image");
@@ -142,7 +145,7 @@ export default class HatenaPlugin extends Plugin {
 							method: "POST",
 					  };
 
-				const response = await requestUrl({
+				let response = await requestUrl({
 					url,
 					method,
 					contentType: "application/xml",
@@ -150,8 +153,28 @@ export default class HatenaPlugin extends Plugin {
 						"X-WSSE": token,
 					},
 					body,
+				}).catch((e) => {
+					console.error(e);
+					return e;
 				});
 
+				if (savedMemberUri && response.status === 404) {
+					// The member uri is not found. It may be deleted.
+					// So, create a new entry.
+					response = await requestUrl({
+						url: `${rootEndpoint}/entry`,
+						method: "POST",
+						contentType: "application/xml",
+						headers: {
+							"X-WSSE": token,
+						},
+						body,
+					}).catch((e) => {
+						console.error(e);
+						return e;
+					});
+				}
+				
 				if (response.status !== 201 && response.status !== 200) {
 					new Notice("Failed to publish");
 					return;
