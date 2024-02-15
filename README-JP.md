@@ -6,6 +6,9 @@
 
 ## 初期設定
 
+あらかじめ、はてなブログの[編集モード](https://help.hatenablog.com/entry/editing-mode)を「Markdownモード」に設定してください。
+[基本設定](http://blog.hatena.ne.jp/my/config)画面の「編集モード」か、各ブログの設定画面の「編集モード」で設定できます。
+
 このプラグインを動作させるには、はてなブログのRoot endpointとAPI Keyを設定する必要があります。
 
 **設定:**

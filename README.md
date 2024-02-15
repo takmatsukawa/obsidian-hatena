@@ -6,6 +6,9 @@ Post directly to your [Hatena Blog](https://hatenablog.com/) from [Obsidian](htt
 
 ## Initial setup
 
+Please set the [editing mode](https://help.hatenablog.com/entry/editing-mode) of Hatena Blog to "Markdown mode" in advance.
+You can set it in the "Editing Mode" of the [Basic Settings page](http://blog.hatena.ne.jp/my/config) or in the "Editing Mode" of each blog's settings page.
+
 For this plugin to work, you will need to provide your Hatena blog's root endpoint and API key.
 
 **Settings:**
