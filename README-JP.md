@@ -1,6 +1,6 @@
 # Obsidian Hatena Blog Publisher
 
-[English](https://github.com/takmatsukawa/obsidian-hatena/blob/master/README-JP.md)
+[English](https://github.com/takmatsukawa/obsidian-hatena/blob/master/README.md)
 
 [Obsidian](https://obsidian.md/)のノートを[はてなブログ](https://hatenablog.com/)に直接投稿できます。
 
