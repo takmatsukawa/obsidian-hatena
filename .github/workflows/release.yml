@@ -32,4 +32,4 @@ jobs:
             --title="$tag" \
             --draft \
             --generate-notes \
-            main.js manifest.json
+            main.js styles.css manifest.json
