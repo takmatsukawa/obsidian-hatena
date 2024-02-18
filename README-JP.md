@@ -21,3 +21,7 @@
 **コマンド:**
 
 - `Publish this note`: 現在アクティブなノートをはてなブログに投稿する。
+
+## フィードバック
+
+何か問題が発生した場合、または新しい機能をリクエストしたい場合は、[こちら](https://github.com/takmatsukawa/obsidian-hatena/issues/new)から連絡ください。

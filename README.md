@@ -21,3 +21,7 @@ For this plugin to work, you will need to provide your Hatena blog's root endpoi
 **Commands:**
 
 - `Publish this note`: Posts the current active note to Hatena Blog.
+
+## Feedback
+
+If you encounter any issues or would like to request a new feature, please submit them [here](https://github.com/takmatsukawa/obsidian-hatena/issues/new).
