@@ -1,7 +1,9 @@
 import {
 	Editor,
+	EmbedCache,
 	MarkdownView,
 	Notice,
+	TFile,
 	normalizePath,
 	requestUrl,
 } from "obsidian";
@@ -43,7 +45,6 @@ export async function postCommand(
 
 	new Notice("Publishing...");
 
-	const domParser = new DOMParser();
 	let text = editor.getValue();
 
 	const meta = view.app.metadataCache.getFileCache(file);
@@ -51,51 +52,7 @@ export async function postCommand(
 	if (meta?.embeds) {
 		for (const embed of meta.embeds) {
 			const { original, link } = embed;
-			if (!fileNameRegex1.test(link)) {
-				continue;
-			}
-			const source = view.app.metadataCache.getFirstLinkpathDest(
-				link,
-				file.path,
-			);
-			if (!source) {
-				continue;
-			}
-
-			// Base64 encode the file
-			const fileBinaly = await view.app.vault.adapter.readBinary(
-				normalizePath(source.path),
-			);
-			const base64File = Buffer.from(fileBinaly).toString("base64");
-			const fileMime = mime.getType(source.extension);
-
-			const postUrl = "https://f.hatena.ne.jp/atom/post";
-			const body = `<entry xmlns="http://purl.org/atom/ns#">
-			<dc:subject>Hatena Blog</dc:subject>
-			<title>${he.escape(source.basename)}</title>
-			<content mode="base64" type="${fileMime}">${base64File}</content>
-			</entry>`;
-			const response = await requestUrl({
-				url: postUrl,
-				method: "POST",
-				contentType: "application/xml",
-				headers: {
-					"X-WSSE": token,
-					Accept: "application/x.atom+xml, application/xml, text/xml, */*",
-				},
-				body,
-			}).catch((e) => {
-				console.error(e);
-				return e;
-			});
-			if (response.status !== 201 && response.status !== 200) {
-				new Notice("Failed to upload image");
-				return;
-			}
-			// Get the image id
-			const xmlDoc = domParser.parseFromString(response.text, "text/xml");
-			const imageId =
-				xmlDoc.getElementsByTagName("hatena:syntax")[0].textContent;
+			const imageId = await postImage({ view, file, link, token });
 			if (imageId) {
 				const re = new RegExp(escapeRegExp(original), "g");
 				text = text.replace(re, `[${imageId}]`);
@@ -171,6 +128,7 @@ export async function postCommand(
 
 	const memberUri = response.headers.location;
 
+	const domParser = new DOMParser();
 	const xmlDoc = domParser.parseFromString(response.text, "text/xml");
 	const alternateLink = xmlDoc.querySelector('link[rel="alternate"]');
 	const hatenaUrl = alternateLink?.getAttribute("href");
@@ -186,6 +144,58 @@ export async function postCommand(
 
 	new Notice("Published successfully!");
 }
+
+const postImage = async ({
+	view,
+	file,
+	link,
+	token,
+}: { view: MarkdownView; file: TFile; link: string; token: string }) => {
+	if (!fileNameRegex1.test(link)) {
+		return null;
+	}
+	const source = view.app.metadataCache.getFirstLinkpathDest(link, file.path);
+	if (!source) {
+		return null;
+	}
+
+	// Base64 encode the file
+	const fileBinaly = await view.app.vault.adapter.readBinary(
+		normalizePath(source.path),
+	);
+	const base64File = Buffer.from(fileBinaly).toString("base64");
+	const fileMime = mime.getType(source.extension);
+
+	const postUrl = "https://f.hatena.ne.jp/atom/post";
+	const body = `<entry xmlns="http://purl.org/atom/ns#">
+	<dc:subject>Hatena Blog</dc:subject>
+	<title>${he.escape(source.basename)}</title>
+	<content mode="base64" type="${fileMime}">${base64File}</content>
+	</entry>`;
+	const response = await requestUrl({
+		url: postUrl,
+		method: "POST",
+		contentType: "application/xml",
+		headers: {
+			"X-WSSE": token,
+			Accept: "application/x.atom+xml, application/xml, text/xml, */*",
+		},
+		body,
+	}).catch((e) => {
+		console.error(e);
+		return e;
+	});
+	if (response.status !== 201 && response.status !== 200) {
+		new Notice("Failed to upload image");
+		return null;
+	}
+	// Get the image id
+	const domParser = new DOMParser();
+	const xmlDoc = domParser.parseFromString(response.text, "text/xml");
+	const imageId = xmlDoc.getElementsByTagName("hatena:syntax")[0].textContent;
+
+	return imageId;
+};
 
 /**
  * [[link]] -> link
