@@ -18,6 +18,7 @@ export async function postCommand(
 	plugin: HatenaPlugin,
 	editor: Editor,
 	view: MarkdownView,
+	draft = false
 ) {
 	const apiKey = plugin.settings.apiKey;
 	const rootEndpoint = plugin.settings.rootEndpoint;
@@ -43,7 +44,20 @@ export async function postCommand(
 		return;
 	}
 
-	new Notice("Publishing...");
+	const savedMemberUri =
+		view.app.metadataCache.getFileCache(file)?.frontmatter?.[
+			"hatena-member-uri"
+		];
+
+	if (savedMemberUri && draft) {
+		const isPublic = await isPublicArticle({ memberUri: savedMemberUri, token });
+		if (isPublic) {
+			new Notice("The article of this note is already public. You can't post it as a draft.");
+			return;
+		}
+	}
+
+	new Notice(draft ? "Posting as a draft..." : "Publishing...");
 
 	let text = editor.getValue();
 
@@ -52,10 +66,15 @@ export async function postCommand(
 	if (meta?.embeds) {
 		for (const embed of meta.embeds) {
 			const { original, link } = embed;
-			const imageId = await postImage({ view, file, link, token });
-			if (imageId) {
-				const re = new RegExp(escapeRegExp(original), "g");
-				text = text.replace(re, `[${imageId}]`);
+			try {
+				const imageId = await postImage({ view, file, link, token });
+				if (imageId) {
+					const re = new RegExp(escapeRegExp(original), "g");
+					text = text.replace(re, `[${imageId}]`);
+				}
+			} catch (e) {
+				new Notice("Failed to upload image");
+				return;
 			}
 		}
 	}
@@ -75,12 +94,11 @@ export async function postCommand(
 		   xmlns:app="http://www.w3.org/2007/app">
 	  <title>${he.escape(title)}</title>
 	  <content type="text/plain">${he.escape(text)}</content>
+	  <app:control>
+		<app:draft>${draft ? "yes" : "no"}</app:draft>
+	  </app:control>
 	</entry>`;
 
-	const savedMemberUri =
-		view.app.metadataCache.getFileCache(file)?.frontmatter?.[
-			"hatena-member-uri"
-		];
 	const { url, method } = savedMemberUri
 		? {
 				url: savedMemberUri,
@@ -122,7 +140,7 @@ export async function postCommand(
 	}
 
 	if (response.status !== 201 && response.status !== 200) {
-		new Notice("Failed to publish");
+		new Notice("Failed to post");
 		return;
 	}
 
@@ -142,7 +160,7 @@ export async function postCommand(
 		}
 	});
 
-	new Notice("Published successfully!");
+	new Notice(draft ? "Posted as a draft successfully!" : "Published successfully!");
 }
 
 const postImage = async ({
@@ -168,10 +186,11 @@ const postImage = async ({
 
 	const postUrl = "https://f.hatena.ne.jp/atom/post";
 	const body = `<entry xmlns="http://purl.org/atom/ns#">
-	<dc:subject>Hatena Blog</dc:subject>
-	<title>${he.escape(source.basename)}</title>
-	<content mode="base64" type="${fileMime}">${base64File}</content>
+		<dc:subject>Hatena Blog</dc:subject>
+		<title>${he.escape(source.basename)}</title>
+		<content mode="base64" type="${fileMime}">${base64File}</content>
 	</entry>`;
+	
 	const response = await requestUrl({
 		url: postUrl,
 		method: "POST",
@@ -181,14 +200,8 @@ const postImage = async ({
 			Accept: "application/x.atom+xml, application/xml, text/xml, */*",
 		},
 		body,
-	}).catch((e) => {
-		console.error(e);
-		return e;
 	});
-	if (response.status !== 201 && response.status !== 200) {
-		new Notice("Failed to upload image");
-		return null;
-	}
+
 	// Get the image id
 	const domParser = new DOMParser();
 	const xmlDoc = domParser.parseFromString(response.text, "text/xml");
@@ -196,6 +209,31 @@ const postImage = async ({
 
 	return imageId;
 };
+
+const isPublicArticle = async ({
+	memberUri,
+	token,
+}: { memberUri: string, token: string }) => {
+	try {
+		const response = await requestUrl({
+			url: memberUri,
+			method: "GET",
+			contentType: "application/xml",
+			headers: {
+				"X-WSSE": token,
+			},
+		});
+	
+		const domParser = new DOMParser();
+		const xmlDoc = domParser.parseFromString(response.text, "text/xml");
+		const draft = xmlDoc.getElementsByTagName("app:draft")[0].textContent;
+	
+		return draft !== "yes";
+	} catch (e) {
+		console.error(e);
+		return false;
+	}
+}
 
 /**
  * [[link]] -> link

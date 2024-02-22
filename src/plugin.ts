@@ -19,6 +19,13 @@ export default class HatenaPlugin extends Plugin {
 				postCommand(this, editor, view),
 		});
 
+		this.addCommand({
+			id: "draft",
+			name: "Post this note as a draft",
+			editorCallback: (editor: Editor, view: MarkdownView) =>
+				postCommand(this, editor, view, true),
+		});
+
 		this.addSettingTab(new HatenaSettingTab(this.app, this));
 	}
 
