@@ -25,4 +25,4 @@
 
 ## フィードバック
 
-何か問題が発生した場合、または新しい機能をリクエストしたい場合は、[こちら](https://github.com/takmatsukawa/obsidian-hatena/issues/new)から連絡ください。
+何か問題が発生した場合、または新しい機能をリクエストしたい場合は、[こちら](https://github.com/takmatsukawa/obsidian-hatena/issues/new)から登録するか[作者](https://twitter.com/takmatsukawa)に連絡ください。

@@ -25,4 +25,4 @@ For this plugin to work, you will need to provide your Hatena blog's root endpoi
 
 ## Feedback
 
-If you encounter any issues or would like to request a new feature, please submit them [here](https://github.com/takmatsukawa/obsidian-hatena/issues/new).
+If you encounter any issues or would like to request a new feature, please submit them [here](https://github.com/takmatsukawa/obsidian-hatena/issues/new) or notice [me](https://twitter.com/takmatsukawa).
