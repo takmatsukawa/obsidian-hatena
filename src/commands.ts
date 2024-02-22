@@ -18,7 +18,7 @@ export async function postCommand(
 	plugin: HatenaPlugin,
 	editor: Editor,
 	view: MarkdownView,
-	draft = false
+	draft = false,
 ) {
 	const apiKey = plugin.settings.apiKey;
 	const rootEndpoint = plugin.settings.rootEndpoint;
@@ -50,9 +50,14 @@ export async function postCommand(
 		];
 
 	if (savedMemberUri && draft) {
-		const isPublic = await isPublicArticle({ memberUri: savedMemberUri, token });
+		const isPublic = await isPublicArticle({
+			memberUri: savedMemberUri,
+			token,
+		});
 		if (isPublic) {
-			new Notice("The article of this note is already public. You can't post it as a draft.");
+			new Notice(
+				"The article of this note is already public. You can't post it as a draft.",
+			);
 			return;
 		}
 	}
@@ -160,7 +165,9 @@ export async function postCommand(
 		}
 	});
 
-	new Notice(draft ? "Posted as a draft successfully!" : "Published successfully!");
+	new Notice(
+		draft ? "Posted as a draft successfully!" : "Published successfully!",
+	);
 }
 
 const postImage = async ({
@@ -190,7 +197,7 @@ const postImage = async ({
 		<title>${he.escape(source.basename)}</title>
 		<content mode="base64" type="${fileMime}">${base64File}</content>
 	</entry>`;
-	
+
 	const response = await requestUrl({
 		url: postUrl,
 		method: "POST",
@@ -213,7 +220,7 @@ const postImage = async ({
 const isPublicArticle = async ({
 	memberUri,
 	token,
-}: { memberUri: string, token: string }) => {
+}: { memberUri: string; token: string }) => {
 	try {
 		const response = await requestUrl({
 			url: memberUri,
@@ -223,17 +230,17 @@ const isPublicArticle = async ({
 				"X-WSSE": token,
 			},
 		});
-	
+
 		const domParser = new DOMParser();
 		const xmlDoc = domParser.parseFromString(response.text, "text/xml");
 		const draft = xmlDoc.getElementsByTagName("app:draft")[0].textContent;
-	
+
 		return draft !== "yes";
 	} catch (e) {
 		console.error(e);
 		return false;
 	}
-}
+};
 
 /**
  * [[link]] -> link

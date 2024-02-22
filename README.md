@@ -1,6 +1,6 @@
 # Obsidian Hatena Blog Publisher
 
-[日本語](https://github.com/takmatsukawa/obsidian-hatena/blob/master/README-JP.md)
+English | [日本語](https://github.com/takmatsukawa/obsidian-hatena/blob/master/README-JP.md)
 
 Post directly to your [Hatena Blog](https://hatenablog.com/) from [Obsidian](https://obsidian.md/).
 
@@ -21,6 +21,7 @@ For this plugin to work, you will need to provide your Hatena blog's root endpoi
 **Commands:**
 
 - `Publish this note`: Posts the current active note to Hatena Blog.
+- `Post this note as a draft`: Posts the current active note to Hatena Blog as a draft.
 
 ## Feedback
 
