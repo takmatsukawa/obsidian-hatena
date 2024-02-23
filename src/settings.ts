@@ -24,6 +24,8 @@ export class HatenaSettingTab extends PluginSettingTab {
 
 		containerEl.empty();
 
+		containerEl.createEl("h2", { text: "Hatena Blog Publisher Settings", })
+
 		new Setting(containerEl)
 			.setName("API Key")
 			.setDesc("Hatena user API key.")
