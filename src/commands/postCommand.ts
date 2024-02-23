@@ -1,16 +1,16 @@
 import {
 	Editor,
-	EmbedCache,
 	MarkdownView,
 	Notice,
 	TFile,
 	normalizePath,
 	requestUrl,
 } from "obsidian";
-import { getWsseHeader } from "./wsse";
+import HatenaPlugin from "../plugin";
+
+import { getWsseHeader } from "../wsse";
 import * as he from "he";
 import mime from "mime";
-import HatenaPlugin from "./plugin";
 
 const fileNameRegex1 = /(jpe?g|png|gif|svg|bmp|webp)$/i;
 
