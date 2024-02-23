@@ -84,14 +84,10 @@ export async function postCommand(
 		}
 	}
 
-	const position =
-		view.app.metadataCache.getFileCache(file)?.frontmatterPosition;
-	if (position) {
-		const end = position.end.line + 1;
-		text = text.split("\n").slice(end).join("\n");
-	}
-
+	text = removeFrontmatter(view, file, text);
+	text = removeMarkdownComments(text);
 	text = replaceInternalLink(text);
+
 	const title = file.name.replace(/\.md$/, "");
 
 	const body = `<?xml version="1.0" encoding="utf-8"?>
@@ -252,3 +248,15 @@ const replaceInternalLink = (text: string) =>
 
 const escapeRegExp = (string: string) =>
 	string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+const removeMarkdownComments = (text: string) => text.replace(/%%(.|\n)*?%%/g, "")
+
+function removeFrontmatter(view: MarkdownView, file: TFile, text: string) {
+	const position = view.app.metadataCache.getFileCache(file)?.frontmatterPosition;
+	if (!position) {
+		return text;
+	}
+	const end = position.end.line + 1;
+	return text.split("\n").slice(end).join("\n");
+}
+
