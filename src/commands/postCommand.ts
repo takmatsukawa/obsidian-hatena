@@ -86,6 +86,7 @@ export async function postCommand(
 
 	text = removeFrontmatter(view, file, text);
 	text = removeMarkdownComments(text);
+	text = replaceInternalLinkWithCustomDisplayText(text);
 	text = replaceInternalLink(text);
 
 	const title = file.name.replace(/\.md$/, "");
@@ -239,6 +240,14 @@ const isPublicArticle = async ({
 };
 
 /**
+ * [[link|custom display text]] -> custom display text
+ * @param text
+ * @returns
+ */
+const replaceInternalLinkWithCustomDisplayText = (text: string) =>
+	text.replace(/\[\[(.+?)\|(.+?)\]\]/g, "$2");
+
+/**
  * [[link]] -> link
  * @param text
  * @returns
@@ -249,14 +258,15 @@ const replaceInternalLink = (text: string) =>
 const escapeRegExp = (string: string) =>
 	string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
-const removeMarkdownComments = (text: string) => text.replace(/%%(.|\n)*?%%/g, "")
+const removeMarkdownComments = (text: string) =>
+	text.replace(/%%(.|\n)*?%%/g, "");
 
 function removeFrontmatter(view: MarkdownView, file: TFile, text: string) {
-	const position = view.app.metadataCache.getFileCache(file)?.frontmatterPosition;
+	const position =
+		view.app.metadataCache.getFileCache(file)?.frontmatterPosition;
 	if (!position) {
 		return text;
 	}
 	const end = position.end.line + 1;
 	return text.split("\n").slice(end).join("\n");
 }
-
