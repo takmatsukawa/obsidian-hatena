@@ -86,7 +86,6 @@ export async function postCommand(
 
 	text = removeFrontmatter(view, file, text);
 	text = removeMarkdownComments(text);
-	text = replaceInternalLinkWithCustomDisplayText(text);
 	text = replaceInternalLink(text);
 
 	const title = file.name.replace(/\.md$/, "");
@@ -240,20 +239,13 @@ const isPublicArticle = async ({
 };
 
 /**
+ * [[link]] -> link
  * [[link|custom display text]] -> custom display text
  * @param text
  * @returns
  */
-const replaceInternalLinkWithCustomDisplayText = (text: string) =>
-	text.replace(/\[\[(.+?)\|(.+?)\]\]/g, "$2");
-
-/**
- * [[link]] -> link
- * @param text
- * @returns
- */
 const replaceInternalLink = (text: string) =>
-	text.replace(/\[\[(.+?)\]\]/g, "$1");
+	text.replace(/\[\[(?:[^\|\]]*\|)?([^\]]+)\]\]/g, "$1");
 
 const escapeRegExp = (string: string) =>
 	string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
