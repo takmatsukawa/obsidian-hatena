@@ -23,6 +23,24 @@ For this plugin to work, you will need to provide your Hatena blog's root endpoi
 - `Publish this note`: Posts the current active note to Hatena Blog.
 - `Post this note as a draft`: Posts the current active note to Hatena Blog as a draft.
 
+## Tips
+
+### Comments
+
+You can add comments by wrapping text with `%%`. Comments are only visible in Editing view and will not be published to Hatena Blog.
+
+```markdown
+This is an %%inline%% comment.
+
+%%
+This is a block comment.
+
+Block comments can span multiple lines.
+
+You can [[link]] to other notes in the comment.
+%%
+```
+
 ## Feedback
 
 If you encounter any issues or would like to request a new feature, please submit them [here](https://github.com/takmatsukawa/obsidian-hatena/issues/new) or notice [me](https://twitter.com/takmatsukawa).
