@@ -1,4 +1,4 @@
-import { insertTocCommand } from './insertTocCommand';
-import { postCommand } from './postCommand';
+import { insertTocCommand } from "./insertTocCommand";
+import { postCommand } from "./postCommand";
 
-export { insertTocCommand, postCommand};
+export { insertTocCommand, postCommand };
