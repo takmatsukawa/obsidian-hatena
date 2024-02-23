@@ -28,7 +28,7 @@ For this plugin to work, you will need to provide your Hatena blog's root endpoi
 
 ### Comments
 
-You can add comments by wrapping text with `%%`. Comments are only visible in Editing view and will not be published to Hatena Blog.
+You can add comments by wrapping text with `%%` in the note. Comments are only visible in Editing view and will not be published to Hatena Blog.
 
 ```markdown
 This is an %%inline%% comment.
