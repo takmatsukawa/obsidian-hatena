@@ -86,6 +86,7 @@ export async function postCommand(
 
 	text = removeFrontmatter(view, file, text);
 	text = removeMarkdownComments(text);
+	text = replaceInternalLinkWithCustomDisplayText(text);
 	text = replaceInternalLink(text);
 
 	const title = file.name.replace(/\.md$/, "");
@@ -237,6 +238,14 @@ const isPublicArticle = async ({
 		return false;
 	}
 };
+
+/**
+ * [[link|custom display text]] -> custom display text
+ * @param text
+ * @returns
+ */
+const replaceInternalLinkWithCustomDisplayText = (text: string) =>
+	text.replace(/\[\[(.+?)\|(.+?)\]\]/g, "$2");
 
 /**
  * [[link]] -> link
