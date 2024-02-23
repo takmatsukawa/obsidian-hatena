@@ -4,7 +4,7 @@ import {
 	DEFAULT_SETTINGS,
 	HatenaSettingTab,
 } from "./settings";
-import { postCommand } from "./commands";
+import { postCommand, insertTocCommand } from "./commands";
 
 export default class HatenaPlugin extends Plugin {
 	settings: HatenaPluginSettings;
@@ -24,6 +24,12 @@ export default class HatenaPlugin extends Plugin {
 			name: "Post this note as a draft",
 			editorCallback: (editor: Editor, view: MarkdownView) =>
 				postCommand(this, editor, view, true),
+		});
+
+		this.addCommand({
+			id: "insert-toc",
+			name: "Insert table of contents",
+			editorCallback: insertTocCommand,
 		});
 
 		this.addSettingTab(new HatenaSettingTab(this.app, this));
