@@ -1,6 +1,6 @@
 {
 	"name": "obsidian-hatena-plugin",
-	"version": "0.3.0",
+	"version": "0.3.1",
 	"description": "This is a hatena plugin for Obsidian (https://obsidian.md)",
 	"main": "main.js",
 	"scripts": {
