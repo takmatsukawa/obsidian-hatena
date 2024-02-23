@@ -258,14 +258,15 @@ const replaceInternalLink = (text: string) =>
 const escapeRegExp = (string: string) =>
 	string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
-const removeMarkdownComments = (text: string) => text.replace(/%%(.|\n)*?%%/g, "")
+const removeMarkdownComments = (text: string) =>
+	text.replace(/%%(.|\n)*?%%/g, "");
 
 function removeFrontmatter(view: MarkdownView, file: TFile, text: string) {
-	const position = view.app.metadataCache.getFileCache(file)?.frontmatterPosition;
+	const position =
+		view.app.metadataCache.getFileCache(file)?.frontmatterPosition;
 	if (!position) {
 		return text;
 	}
 	const end = position.end.line + 1;
 	return text.split("\n").slice(end).join("\n");
 }
-
