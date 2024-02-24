@@ -5,6 +5,11 @@ import {
 	HatenaSettingTab,
 } from "./settings";
 import { postCommand, insertTocCommand } from "./commands";
+import {
+	deleteCommand,
+	isDeleteCommandPossible,
+} from "./commands/deleteCommand";
+import { getWsseHeader } from "./utils/wsse";
 
 export default class HatenaPlugin extends Plugin {
 	settings: HatenaPluginSettings;
@@ -32,6 +37,24 @@ export default class HatenaPlugin extends Plugin {
 			editorCallback: insertTocCommand,
 		});
 
+		this.addCommand({
+			id: "delete",
+			name: "Delete the article of this note",
+			editorCheckCallback: (
+				checking: boolean,
+				editor: Editor,
+				view: MarkdownView,
+			) => {
+				if (checking) {
+					return isDeleteCommandPossible(view);
+				}
+
+				deleteCommand(this, view);
+
+				return true;
+			},
+		});
+
 		this.addSettingTab(new HatenaSettingTab(this.app, this));
 	}
 
@@ -43,5 +66,23 @@ export default class HatenaPlugin extends Plugin {
 
 	async saveSettings() {
 		await this.saveData(this.settings);
+	}
+
+	async generateToken() {
+		const apiKey = this.settings.apiKey;
+		const rootEndpoint = this.settings.rootEndpoint;
+		if (!apiKey.length || !rootEndpoint.length) {
+			return null;
+		}
+		// rootEndpoint is like: https://blog.hatena.ne.jp/userId/userId.hatenablog.com/atom
+		const userId = rootEndpoint.split("/")[3];
+		if (!userId) {
+			return null;
+		}
+
+		return getWsseHeader({
+			username: userId,
+			password: apiKey,
+		});
 	}
 }

@@ -8,7 +8,6 @@ import {
 } from "obsidian";
 import HatenaPlugin from "../plugin";
 
-import { getWsseHeader } from "../wsse";
 import * as he from "he";
 import mime from "mime";
 
@@ -20,23 +19,17 @@ export async function postCommand(
 	view: MarkdownView,
 	draft = false,
 ) {
-	const apiKey = plugin.settings.apiKey;
 	const rootEndpoint = plugin.settings.rootEndpoint;
-	if (!apiKey.length || !rootEndpoint.length) {
-		new Notice("API Key or Root Endpoint is not set");
-		return;
-	}
-	// rootEndpoint is like: https://blog.hatena.ne.jp/userId/userId.hatenablog.com/atom
-	const userId = rootEndpoint.split("/")[3];
-	if (!userId) {
-		new Notice("Invalid Root Endpoint");
+	if (!rootEndpoint.length) {
+		new Notice("Root Endpoint is not set");
 		return;
 	}
 
-	const token = await getWsseHeader({
-		username: userId,
-		password: apiKey,
-	});
+	const token = await plugin.generateToken();
+	if (!token) {
+		new Notice("There was something wrong with the API Key or Root Endpoint");
+		return;
+	}
 
 	const file = view.file;
 	if (!file) {
