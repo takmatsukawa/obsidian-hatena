@@ -22,6 +22,7 @@ For this plugin to work, you will need to provide your Hatena blog's root endpoi
 
 - `Publish this note`: Posts the current active note to Hatena Blog.
 - `Post this note as a draft`: Posts the current active note to Hatena Blog as a draft.
+- `Delete the article of this note`: Deletes the article of the current active note from Hatena Blog.
 - `Insert table of contents`: Insert a table of contents. It will only appear as a table of contents on the Hatena Blog screen.
 
 ## Tips

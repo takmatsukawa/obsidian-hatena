@@ -22,7 +22,8 @@
 
 - `Publish this note`: 現在アクティブなノートをはてなブログに投稿する
 - `Post this note as a draft`: 現在アクティブなノートをはてなブログに下書きとして投稿する
-- `Insert table of contents`: 目次を挿入する。はてなブログ画面でのみ目次として表示されます。
+- `Delete the article of this note`: 現在アクティブなノートの記事をはてなブログから削除する
+- `Insert table of contents`: 目次を挿入する。はてなブログ画面でのみ目次として表示される
 
 ## Tips
 
