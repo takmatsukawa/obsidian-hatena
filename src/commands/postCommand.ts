@@ -138,12 +138,10 @@ export async function postCommand(
 		return;
 	}
 
-	const memberUri = response.headers.location;
-
 	const domParser = new DOMParser();
 	const xmlDoc = domParser.parseFromString(response.text, "text/xml");
-	const alternateLink = xmlDoc.querySelector('link[rel="alternate"]');
-	const hatenaUrl = alternateLink?.getAttribute("href");
+	const memberUri = xmlDoc.querySelector("link[rel='edit']")?.getAttribute("href");
+	const hatenaUrl = xmlDoc.querySelector('link[rel="alternate"]')?.getAttribute("href");
 
 	view.app.fileManager.processFrontMatter(file, (fm) => {
 		if (memberUri) {
