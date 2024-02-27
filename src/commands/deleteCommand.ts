@@ -21,11 +21,9 @@ export const deleteCommand = async (
 	new ConfirmModal({
 		app: plugin.app,
 		title: "Delete the Hatena Blog's article of this note?",
-		onSubmit: async (result) => {
-			if (!result) {
-				return;
-			}
-
+		text: "This action cannot be undone.",
+		cta: "Delete",
+		onAccept: async () => {
 			const file = view.file;
 			if (!file) {
 				return;

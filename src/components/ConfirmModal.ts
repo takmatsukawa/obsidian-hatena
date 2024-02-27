@@ -1,41 +1,48 @@
-import { App, Modal, Setting } from "obsidian";
+import { App, Modal } from "obsidian";
 
 interface Params {
 	app: App;
 	title: string;
-	onSubmit: (result: boolean) => void;
+	text?: string;
+	cta: string;
+	onAccept: () => void;
 }
 
 export class ConfirmModal extends Modal {
 	private title: string;
-	private onSubmit: Params["onSubmit"];
+	private text?: string;
+	private cta: string;
+	private onAccept: Params["onAccept"];
 
-	constructor({ app, title, onSubmit }: Params) {
+	constructor({ app, title, text, cta, onAccept }: Params) {
 		super(app);
 		this.title = title;
-		this.onSubmit = onSubmit;
+		this.text = text;
+		this.cta = cta;
+		this.onAccept = onAccept;
 	}
 
 	onOpen() {
-		const { contentEl, title } = this;
+		const { contentEl, title, text, cta } = this;
 
 		contentEl.createEl("h2", { text: title });
 
-		new Setting(contentEl)
-			.addButton((btn) =>
-				btn.setButtonText("Cancel").onClick(() => {
-					this.close();
-				}),
-			)
-			.addButton((btn) =>
-				btn
-					.setButtonText("Delete")
-					.setWarning()
-					.onClick(() => {
-						this.close();
-						this.onSubmit(true);
-					}),
-			);
+		if (text) {
+			contentEl.createEl("p", { text });
+		}
+
+		const container = contentEl.createDiv("modal-button-container");
+		container
+			.createEl("button", { text: "Never mind" })
+			.addEventListener("click", () => {
+				this.close();
+			});
+		container
+			.createEl("button", { text: cta, cls: "mod-cta" })
+			.addEventListener("click", () => {
+				this.close();
+				this.onAccept();
+			});
 	}
 
 	onClose() {
