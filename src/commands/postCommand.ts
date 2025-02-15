@@ -97,11 +97,11 @@ export async function postCommand(
 		? {
 				url: savedMemberUri,
 				method: "PUT",
-		  }
+			}
 		: {
 				url: `${rootEndpoint}/entry`,
 				method: "POST",
-		  };
+			};
 
 	let response = await requestUrl({
 		url,
