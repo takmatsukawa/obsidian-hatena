@@ -1,12 +1,12 @@
 import {
-	Editor,
-	MarkdownView,
+	type Editor,
+	type MarkdownView,
 	Notice,
-	TFile,
+	type TFile,
 	normalizePath,
 	requestUrl,
 } from "obsidian";
-import HatenaPlugin from "../plugin";
+import type HatenaPlugin from "../plugin";
 
 import * as he from "he";
 import mime from "mime";
@@ -55,7 +55,7 @@ export async function postCommand(
 		}
 	}
 
-	new Notice(draft ? "Posting as a draft..." : "Publishing...");
+	const postingNotice = new Notice(draft ? "Posting as a draft..." : "Publishing...", 0);
 
 	let text = editor.getValue();
 
@@ -71,6 +71,7 @@ export async function postCommand(
 					text = text.replace(re, `[${imageId}]`);
 				}
 			} catch (e) {
+				postingNotice.hide();
 				new Notice("Failed to upload image");
 				return;
 			}
@@ -112,9 +113,12 @@ export async function postCommand(
 		},
 		body,
 	}).catch((e) => {
+		postingNotice.hide();
 		console.error(e);
 		return e;
 	});
+
+	postingNotice.hide();
 
 	if (savedMemberUri && response.status === 404) {
 		// The member uri is not found. It may be deleted.
