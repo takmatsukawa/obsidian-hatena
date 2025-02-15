@@ -13,3 +13,4 @@
 
 - `npm version patch|minor|major` to bump the version number.
 - `git push && git push --tags` to push the new version to GitHub.
+- Check the release on GitHub to make sure it looks good and publish it.
