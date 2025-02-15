@@ -1,6 +1,6 @@
-import { Editor, MarkdownView, Plugin } from "obsidian";
+import { type Editor, type MarkdownView, Plugin } from "obsidian";
 import {
-	HatenaPluginSettings,
+	type HatenaPluginSettings,
 	DEFAULT_SETTINGS,
 	HatenaSettingTab,
 } from "./settings";
