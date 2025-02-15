@@ -4,7 +4,8 @@ import {
 	DEFAULT_SETTINGS,
 	HatenaSettingTab,
 } from "./settings";
-import { postCommand, insertTocCommand } from "./commands";
+import { insertTocCommand } from "./commands/insertTocCommand";
+import { postCommand } from "./commands/postCommand";
 import {
 	deleteCommand,
 	isDeleteCommandPossible,

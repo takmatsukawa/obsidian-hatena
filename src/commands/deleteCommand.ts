@@ -1,6 +1,6 @@
-import { MarkdownView, Notice, requestUrl } from "obsidian";
+import { type MarkdownView, Notice, requestUrl } from "obsidian";
 import { ConfirmModal } from "src/components/ConfirmModal";
-import HatenaPlugin from "src/plugin";
+import type HatenaPlugin from "src/plugin";
 
 export const isDeleteCommandPossible = (view: MarkdownView) => {
 	const file = view.file;
