@@ -10,6 +10,7 @@ import type HatenaPlugin from "../plugin";
 
 import * as he from "he";
 import mime from "mime";
+import { ConfirmModal } from "src/components/ConfirmModal";
 
 const fileNameRegex1 = /(jpe?g|png|gif|svg|bmp|webp)$/i;
 
@@ -55,36 +56,44 @@ export async function postCommand(
 		}
 	}
 
-	const postingNotice = new Notice(draft ? "Posting as a draft..." : "Publishing...", 0);
+	new ConfirmModal({
+		app: plugin.app,
+		title: draft ? "Post this note as a draft?" : "Publish this note?",
+		cta: draft ? "Post as a draft" : "Publish",
+		onAccept: async () => {
+			const postingNotice = new Notice(
+				draft ? "Posting as a draft..." : "Publishing...",
+				0,
+			);
 
-	let text = editor.getValue();
+			let text = editor.getValue();
 
-	const meta = view.app.metadataCache.getFileCache(file);
+			const meta = view.app.metadataCache.getFileCache(file);
 
-	if (meta?.embeds) {
-		for (const embed of meta.embeds) {
-			const { original, link } = embed;
-			try {
-				const imageId = await postImage({ view, file, link, token });
-				if (imageId) {
-					const re = new RegExp(escapeRegExp(original), "g");
-					text = text.replace(re, `[${imageId}]`);
+			if (meta?.embeds) {
+				for (const embed of meta.embeds) {
+					const { original, link } = embed;
+					try {
+						const imageId = await postImage({ view, file, link, token });
+						if (imageId) {
+							const re = new RegExp(escapeRegExp(original), "g");
+							text = text.replace(re, `[${imageId}]`);
+						}
+					} catch (e) {
+						postingNotice.hide();
+						new Notice("Failed to upload image");
+						return;
+					}
 				}
-			} catch (e) {
-				postingNotice.hide();
-				new Notice("Failed to upload image");
-				return;
 			}
-		}
-	}
 
-	text = removeFrontmatter(view, file, text);
-	text = removeMarkdownComments(text);
-	text = replaceInternalLink(text);
+			text = removeFrontmatter(view, file, text);
+			text = removeMarkdownComments(text);
+			text = replaceInternalLink(text);
 
-	const title = file.name.replace(/\.md$/, "");
+			const title = file.name.replace(/\.md$/, "");
 
-	const body = `<?xml version="1.0" encoding="utf-8"?>
+			const body = `<?xml version="1.0" encoding="utf-8"?>
 	<entry xmlns="http://www.w3.org/2005/Atom"
 		   xmlns:app="http://www.w3.org/2007/app">
 	  <title>${he.escape(title)}</title>
@@ -94,75 +103,77 @@ export async function postCommand(
 	  </app:control>
 	</entry>`;
 
-	const { url, method } = savedMemberUri
-		? {
-				url: savedMemberUri,
-				method: "PUT",
+			const { url, method } = savedMemberUri
+				? {
+						url: savedMemberUri,
+						method: "PUT",
+					}
+				: {
+						url: `${rootEndpoint}/entry`,
+						method: "POST",
+					};
+
+			let response = await requestUrl({
+				url,
+				method,
+				contentType: "application/xml",
+				headers: {
+					"X-WSSE": token,
+				},
+				body,
+			}).catch((e) => {
+				postingNotice.hide();
+				console.error(e);
+				return e;
+			});
+
+			postingNotice.hide();
+
+			if (savedMemberUri && response.status === 404) {
+				// The member uri is not found. It may be deleted.
+				// So, create a new entry.
+				response = await requestUrl({
+					url: `${rootEndpoint}/entry`,
+					method: "POST",
+					contentType: "application/xml",
+					headers: {
+						"X-WSSE": token,
+					},
+					body,
+				}).catch((e) => {
+					console.error(e);
+					return e;
+				});
 			}
-		: {
-				url: `${rootEndpoint}/entry`,
-				method: "POST",
-			};
 
-	let response = await requestUrl({
-		url,
-		method,
-		contentType: "application/xml",
-		headers: {
-			"X-WSSE": token,
+			if (response.status !== 201 && response.status !== 200) {
+				new Notice("Failed to post");
+				return;
+			}
+
+			const domParser = new DOMParser();
+			const xmlDoc = domParser.parseFromString(response.text, "text/xml");
+			const memberUri = xmlDoc
+				.querySelector("link[rel='edit']")
+				?.getAttribute("href");
+			const hatenaUrl = xmlDoc
+				.querySelector('link[rel="alternate"]')
+				?.getAttribute("href");
+
+			view.app.fileManager.processFrontMatter(file, (fm) => {
+				if (memberUri) {
+					fm["hatena-member-uri"] = memberUri;
+				}
+				if (hatenaUrl) {
+					fm["hatena-url"] = hatenaUrl;
+				}
+			});
+
+			new Notice(
+				draft ? "Posted as a draft successfully!" : "Published successfully!",
+			);
 		},
-		body,
-	}).catch((e) => {
-		postingNotice.hide();
-		console.error(e);
-		return e;
-	});
-
-	postingNotice.hide();
-
-	if (savedMemberUri && response.status === 404) {
-		// The member uri is not found. It may be deleted.
-		// So, create a new entry.
-		response = await requestUrl({
-			url: `${rootEndpoint}/entry`,
-			method: "POST",
-			contentType: "application/xml",
-			headers: {
-				"X-WSSE": token,
-			},
-			body,
-		}).catch((e) => {
-			console.error(e);
-			return e;
-		});
-	}
-
-	if (response.status !== 201 && response.status !== 200) {
-		new Notice("Failed to post");
-		return;
-	}
-
-	const domParser = new DOMParser();
-	const xmlDoc = domParser.parseFromString(response.text, "text/xml");
-	const memberUri = xmlDoc
-		.querySelector("link[rel='edit']")
-		?.getAttribute("href");
-	const hatenaUrl = xmlDoc
-		.querySelector('link[rel="alternate"]')
-		?.getAttribute("href");
-
-	view.app.fileManager.processFrontMatter(file, (fm) => {
-		if (memberUri) {
-			fm["hatena-member-uri"] = memberUri;
-		}
-		if (hatenaUrl) {
-			fm["hatena-url"] = hatenaUrl;
-		}
-	});
-
-	new Notice(
-		draft ? "Posted as a draft successfully!" : "Published successfully!",
-	);
+	}).open();
 }
 
 const postImage = async ({
