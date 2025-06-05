@@ -62,7 +62,7 @@ export async function postCommand(
 		cta: draft ? "Post as a draft" : "Publish",
 		onAccept: async () => {
 			const postingNotice = new Notice(
-				draft ? "Posting as a draft..." : "Publishing...",
+				draft ? "Saving as a draft..." : "Publishing to Hatena Blog...",
 				0,
 			);
 
