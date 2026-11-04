@@ -1,13 +1,27 @@
-import { App, PluginSettingTab, Setting } from "obsidian";
+import { App, PluginSettingTab, SecretComponent, Setting } from "obsidian";
 import HatenaPlugin from "./main";
 
 export interface HatenaPluginSettings {
-	apiKey: string;
+	/**
+	 * Name (ID) of the secret in Obsidian's SecretStorage that holds the
+	 * Hatena API key. The API key itself is never stored in data.json.
+	 */
+	apiKeySecret: string;
 	rootEndpoint: string;
 }
 
+/**
+ * Settings format of versions <= 1.1.1, which stored the API key in plain
+ * text inside data.json.
+ */
+export interface LegacyHatenaPluginSettings {
+	apiKey?: string;
+}
+
+export const DEFAULT_API_KEY_SECRET_ID = "hatena-api-key";
+
 export const DEFAULT_SETTINGS: HatenaPluginSettings = {
-	apiKey: "",
+	apiKeySecret: "",
 	rootEndpoint: "",
 };
 
@@ -28,12 +42,16 @@ export class HatenaSettingTab extends PluginSettingTab {
 
 		new Setting(containerEl)
 			.setName("API Key")
-			.setDesc("Hatena user API key.")
-			.addText((text) =>
-				text.setValue(this.plugin.settings.apiKey).onChange(async (value) => {
-					this.plugin.settings.apiKey = value;
-					await this.plugin.saveSettings();
-				}),
+			.setDesc(
+				"Hatena user API key. It is stored in Obsidian's secret storage, not in the plugin's settings file.",
+			)
+			.addComponent((el) =>
+				new SecretComponent(this.app, el)
+					.setValue(this.plugin.settings.apiKeySecret)
+					.onChange(async (value) => {
+						this.plugin.settings.apiKeySecret = value ?? "";
+						await this.plugin.saveSettings();
+					}),
 			);
 
 		new Setting(containerEl)

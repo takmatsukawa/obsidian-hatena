@@ -1,6 +1,8 @@
 import { type Editor, type MarkdownView, Plugin } from "obsidian";
 import {
 	type HatenaPluginSettings,
+	type LegacyHatenaPluginSettings,
+	DEFAULT_API_KEY_SECRET_ID,
 	DEFAULT_SETTINGS,
 	HatenaSettingTab,
 } from "./settings";
@@ -62,7 +64,39 @@ export default class HatenaPlugin extends Plugin {
 	onunload() {}
 
 	async loadSettings() {
-		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+		const data:
+			| (Partial<HatenaPluginSettings> & LegacyHatenaPluginSettings)
+			| null = await this.loadData();
+		const { apiKey: legacyApiKey, ...rest } = data ?? {};
+		this.settings = Object.assign({}, DEFAULT_SETTINGS, rest);
+
+		if (legacyApiKey !== undefined) {
+			await this.migrateLegacyApiKey(legacyApiKey);
+		}
+	}
+
+	/**
+	 * Moves the API key that older versions stored in plain text in data.json
+	 * into Obsidian's SecretStorage, and removes it from data.json.
+	 */
+	private async migrateLegacyApiKey(legacyApiKey: string) {
+		if (legacyApiKey.length && !this.settings.apiKeySecret) {
+			const secretStorage = this.app.secretStorage;
+			const existingIds = secretStorage.listSecrets();
+			let id = DEFAULT_API_KEY_SECRET_ID;
+			for (
+				let i = 2;
+				existingIds.includes(id) &&
+				secretStorage.getSecret(id) !== legacyApiKey;
+				i++
+			) {
+				id = `${DEFAULT_API_KEY_SECRET_ID}-${i}`;
+			}
+			secretStorage.setSecret(id, legacyApiKey);
+			this.settings.apiKeySecret = id;
+		}
+		// Rewrite data.json without the plain-text apiKey field.
+		await this.saveSettings();
 	}
 
 	async saveSettings() {
@@ -70,9 +104,11 @@ export default class HatenaPlugin extends Plugin {
 	}
 
 	async generateToken() {
-		const apiKey = this.settings.apiKey;
+		const apiKey = this.settings.apiKeySecret
+			? this.app.secretStorage.getSecret(this.settings.apiKeySecret)
+			: null;
 		const rootEndpoint = this.settings.rootEndpoint;
-		if (!apiKey.length || !rootEndpoint.length) {
+		if (!apiKey?.length || !rootEndpoint.length) {
 			return null;
 		}
 		// rootEndpoint is like: https://blog.hatena.ne.jp/userId/userId.hatenablog.com/atom
