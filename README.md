@@ -23,7 +23,7 @@ This plugin requires Obsidian 1.11.4 or later.
 1. Open Settings > Hatena Blog Publisher and click `Link...` next to `API Key`.
 2. Enter an `ID` for the secret (lowercase letters, numbers and dashes only, e.g. `hatena-api-key`) and paste your API key into `Secret`, then click `Save`.
 
-To change the API key later (for example, after regenerating it on Hatena), edit the value of that secret in Settings > Keychain.
+To change the API key later (for example, after regenerating it on Hatena), click `Link...` again, delete the old secret, and add a new one with the new API key in the same way.
 
 ## How to Use
 
