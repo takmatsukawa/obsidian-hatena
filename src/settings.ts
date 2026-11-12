@@ -42,7 +42,7 @@ export class HatenaSettingTab extends PluginSettingTab {
 
 		new Setting(containerEl)
 			.setName("API Key")
-			.setDesc("Hatena user API key. It is stored in Obsidian's Keychain.")
+			.setDesc("Hatena user API key.")
 			.addComponent((el) =>
 				new SecretComponent(this.app, el)
 					.setValue(this.plugin.settings.apiKeySecret)
