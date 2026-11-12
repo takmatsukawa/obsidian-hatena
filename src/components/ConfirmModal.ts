@@ -33,7 +33,7 @@ export class ConfirmModal extends Modal {
 
 		const container = contentEl.createDiv("modal-button-container");
 		container
-			.createEl("button", { text: "Never mind" })
+			.createEl("button", { text: "Cancel" })
 			.addEventListener("click", () => {
 				this.close();
 			});

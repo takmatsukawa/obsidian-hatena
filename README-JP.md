@@ -11,10 +11,17 @@
 
 このプラグインを動作させるには、はてなブログのRoot endpointとAPI Keyを設定する必要があります。
 
+このプラグインにはObsidian 1.11.4以降が必要です。
+
 **設定:**
 
-- `API Key`: はてなのアカウント設定画面から取得できます。
+- `API Key`: はてなのアカウント設定画面から取得できます。API KeyはObsidianのKeychainに保存されます。
 - `Root Endpoint`: はてなブログの設定画面から取得できます： 詳細設定 > AtomPub
+
+**API Keyの設定方法:**
+
+1. 設定 > Hatena Blog Publisher を開き、`API Key` の `Link...` をクリックします。
+2. `ID` にシークレットの名前（小文字・数字・ハイフンのみ。例: `hatena-api-key`）を、`Secret` にAPI Keyを入力して `Save` をクリックします。
 
 ## 使い方
 
