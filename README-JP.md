@@ -15,7 +15,7 @@
 
 **設定:**
 
-- `API Key`: はてなのアカウント設定画面から取得できます。API KeyはObsidianのKeychain（シークレットストレージ）に保存され、プラグインの設定ファイル（`data.json`）には書き込まれません。
+- `API Key`: はてなのアカウント設定画面から取得できます。API KeyはObsidianのKeychainに保存されます。
 - `Root Endpoint`: はてなブログの設定画面から取得できます： 詳細設定 > AtomPub
 
 **API Keyの設定方法:**
