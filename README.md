@@ -25,8 +25,6 @@ This plugin requires Obsidian 1.11.4 or later.
 
 To change the API key later (for example, after regenerating it on Hatena), edit the value of that secret in Settings > Keychain.
 
-If you set an API key in version 1.1.1 or earlier, it is moved to the Keychain automatically as `hatena-api-key` the first time the plugin loads, so you don't need to set it again.
-
 ## How to Use
 
 **Commands:**
