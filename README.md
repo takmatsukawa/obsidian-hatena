@@ -11,10 +11,21 @@ You can set it in the "Editing Mode" of the [Basic Settings page](http://blog.ha
 
 For this plugin to work, you will need to provide your Hatena blog's root endpoint and API key.
 
+This plugin requires Obsidian 1.11.4 or later.
+
 **Settings:**
 
-- `API Key`: You can obtain the API key from Hatena account settings page. The API key is kept in Obsidian's secret storage (keychain) and is not written to the plugin's settings file (`data.json`). An API key configured in an earlier version is migrated to secret storage automatically on first launch (requires Obsidian 1.11.4 or later).
+- `API Key`: You can obtain the API key from Hatena account settings page. The API key is stored in Obsidian's Keychain (secret storage), not in the plugin's settings file (`data.json`).
 - `Root Endpoint`: You can obtain the root endpoint from Hatena Blog settings page: Advanced > AtomPub.
+
+**Setting the API key:**
+
+1. Open Settings > Hatena Blog Publisher and click `Link...` next to `API Key`.
+2. Enter an `ID` for the secret (lowercase letters, numbers and dashes only, e.g. `hatena-api-key`) and paste your API key into `Secret`, then click `Save`.
+
+To change the API key later (for example, after regenerating it on Hatena), edit the value of that secret in Settings > Keychain.
+
+If you set an API key in version 1.1.1 or earlier, it is moved to the Keychain automatically as `hatena-api-key` the first time the plugin loads, so you don't need to set it again.
 
 ## How to Use
 
