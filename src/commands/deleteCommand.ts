@@ -37,6 +37,11 @@ export const deleteCommand = async (
 				return;
 			}
 
+			if (!plugin.getApiKey()) {
+				new Notice("API Key is not set. Please set it in the plugin settings.");
+				return;
+			}
+
 			const token = await plugin.generateToken();
 			if (!token) {
 				new Notice(

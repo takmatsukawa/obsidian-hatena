@@ -26,6 +26,11 @@ export async function postCommand(
 		return;
 	}
 
+	if (!plugin.getApiKey()) {
+		new Notice("API Key is not set. Please set it in the plugin settings.");
+		return;
+	}
+
 	const token = await plugin.generateToken();
 	if (!token) {
 		new Notice("There was something wrong with the API Key or Root Endpoint");

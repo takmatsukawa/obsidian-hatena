@@ -103,10 +103,15 @@ export default class HatenaPlugin extends Plugin {
 		await this.saveData(this.settings);
 	}
 
-	async generateToken() {
+	getApiKey(): string | null {
 		const apiKey = this.settings.apiKeySecret
 			? this.app.secretStorage.getSecret(this.settings.apiKeySecret)
 			: null;
+		return apiKey?.length ? apiKey : null;
+	}
+
+	async generateToken() {
+		const apiKey = this.getApiKey();
 		const rootEndpoint = this.settings.rootEndpoint;
 		if (!apiKey?.length || !rootEndpoint.length) {
 			return null;
