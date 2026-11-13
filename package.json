@@ -15,7 +15,7 @@
 	"devDependencies": {
 		"@biomejs/biome": "1.9.4",
 		"@types/he": "^1.2.3",
-		"@types/node": "^22.13.4",
+		"@types/node": "^26.6.6",
 		"builtin-modules": "5.0.0",
 		"esbuild": "0.25.11",
 		"obsidian": "^1.14.4",
